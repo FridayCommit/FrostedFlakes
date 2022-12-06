@@ -7,6 +7,7 @@ terraform {
   }
 }
 
+# TF_VAR_gh_token
 variable "gh_token" {
   description = "GitHub token"
   type        = string
