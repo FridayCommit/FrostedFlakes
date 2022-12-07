@@ -17,3 +17,4 @@ provider "github" {
   owner = "FridayCommit"
   token = var.gh_token
 }
+

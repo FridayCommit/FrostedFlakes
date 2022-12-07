@@ -2,22 +2,18 @@ variable "repo_name" {
   type = string
 }
 variable "description" {
-  type = string
-  default= ""
+  type    = string
+  default = ""
 }
 variable "auto_init" {
-  type = bool
+  type    = bool
   default = true
 }
 variable "visibility" {
-  type = string
+  type    = string
   default = "internal"
 }
 variable "archive_on_destroy" {
-  type = bool
+  type    = bool
   default = true
-}
-variable "default_branch" {
-  type = string
-  default = "main"
 }

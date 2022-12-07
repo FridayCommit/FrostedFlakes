@@ -1,11 +1,29 @@
 module "repo1" {
-  source = "./github-repo"
-  repo_name = "repo1"
+  source             = "./github-repo"
+  repo_name          = "repo1"
+  visibility         = "public"
+  archive_on_destroy = false
 }
 module "repo2" {
-  source = "./github-repo"
-  repo_name = "repo2"
+  source             = "./github-repo"
+  repo_name          = "repo2"
+  visibility         = "public"
+  archive_on_destroy = false
 }
+
+
+# Override default branch workaround
+resource "github_branch" "development" {
+  repository    = module.repo2.repo_instance
+  branch        = "development"
+  source_branch = "main"
+}
+
+resource "github_branch_default" "default" {
+  repository = module.repo2.repo_instance
+  branch     = github_branch.development.branch
+}
+
 
 # TF_VAR_sonar_token
 variable "sonar_token" {
