@@ -25,17 +25,39 @@ output "repos2" {
   value = local.config_privileges
 }
 module "repo" {
-  for_each = { for repo in local.github_repos : repo.name => repo }
+  for_each = { for repo in local.github_repos : repo.name => repo } # Sets the index if i understand
   source             = "./github-repo"
   repo_name          = each.value.name
   visibility         = each.value.visibility
   archive_on_destroy = false
 }
+resource "github_team" "teams" {
+  for_each = { for team in local.config_privileges : team.team_id => team }
+  name        = each.value.team_id
+  description = "Some cool team"
+  privacy     = "closed"
+  depends_on = [module.repo]
+}
+resource "github_team_repository" "team-bind" {
+  for_each = { for team in local.config_privileges : "${team.team_id}-${team.repo}" => team }
+  team_id    = each.value.team_id
+  repository = each.value.repo
+  permission = "pull"
+  depends_on = [module.repo]
+}
 resource "github_branch" "development" {
   repository    = module.repo["Repo2"].repo_instance
   branch        = "development"
   source_branch = "main"
+  depends_on = [module.repo]
 }
+
+
+
+
+
+
+
 # TF_VAR_sonar_token
 variable "sonar_token" {
   description = "SonarQube token"
