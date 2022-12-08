@@ -17,3 +17,10 @@ variable "archive_on_destroy" {
   type    = bool
   default = true
 }
+variable "extra_members" {
+  type = list(object({
+    name       = string
+    permission = string
+  }))
+  default = []
+}

@@ -26,6 +26,7 @@ module "repo" {
   source             = "./github-repo"
   repo_name          = each.value.name
   visibility         = each.value.visibility
+  extra_members = each.value.extra-members
   archive_on_destroy = false
 }
 
@@ -36,7 +37,7 @@ resource "github_team" "teams" {
   privacy     = each.value.privacy
 }
 resource "github_team_repository" "team-bind" {
-  for_each   = { for team in local.repo_team_binding : "${team.team_id}-${team.repo}" => team }
+  for_each   = { for team in local.repo_team_binding : "${team.repo}-${team.team_id}" => team }
   team_id    = each.value.team_id
   repository = each.value.repo
   permission = each.value.team_permission

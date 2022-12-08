@@ -8,8 +8,9 @@
       permission: pull
     - name: team2
       permission: maintain
-  # extra-members:
-  #   - johan
+  extra-members:
+    - name: felixlut
+      permission: triage
 - name: Repo2
   visibility: public
   topics: []
