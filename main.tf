@@ -32,7 +32,7 @@ module "repo" {
   archive_on_destroy = false
 }
 resource "github_team" "teams" {
-  for_each = { for team in local.config_privileges : team.team_id => team }
+  for_each = { for team in local.config_privileges : team.team_id => team } # This ~works like an if if the team list is empty
   name        = each.value.team_id
   description = "Some cool team"
   privacy     = "closed"
@@ -43,7 +43,7 @@ resource "github_team_repository" "team-bind" {
   team_id    = each.value.team_id
   repository = each.value.repo
   permission = "pull"
-  depends_on = [module.repo]
+  depends_on = [resource.github_team.teams]
 }
 resource "github_branch" "development" {
   repository    = module.repo["Repo2"].repo_instance
