@@ -1,0 +1,15 @@
+- name: Repo1
+  visibility: public
+  topics:
+    - topic1
+    - topic2
+  teams:
+    - team1
+    - team2
+  extra-members:
+    - johan
+- name: Repo2
+  visibility: public
+  topics: []
+  teams: []
+  extra-members: []
