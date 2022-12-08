@@ -32,7 +32,7 @@ module "repo" {
   archive_on_destroy = false
 }
 resource "github_team" "teams" {
-  for_each = { for team in local.config_privileges : team.team_id => team } # This ~works like an if if the team list is empty
+  for_each = { for team in local.config_privileges : team.team_id => team } # This ~works like an conditional if-statement when the team list is empty
   name        = each.value.team_id
   description = "Some cool team"
   privacy     = "closed"
