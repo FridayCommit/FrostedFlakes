@@ -10,6 +10,14 @@ locals {
   }
   ]
   ]))
+  member_team_binding = distinct(flatten([
+  for each_team in local.github_teams : [
+  for member in each_team.members : {
+    username = member
+    team_id  = each_team.name
+  }
+  ]
+  ]))
 }
 
 module "repo" {
@@ -20,11 +28,26 @@ module "repo" {
   extra_members      = each.value.extra-members
   archive_on_destroy = true
 }
-resource "sonarqube_project" "main" {
-  for_each = module.repo
-  name       = each.value.repo_instance
-  project    = each.value.repo_instance
+resource "sonarqube_project" "project" {
+  for_each   = module.repo
+  name       = each.value.repo_instance.name
+  project    = each.value.repo_instance.name
   visibility = "public"
+}
+data "http" "set_branch" {
+  for_each = module.repo
+  url    = "${var.sonar_url}/api/project_branches/rename?name=main&project=${each.value.repo_instance.name}" //TODO felix fatta hur vi passar branch
+  method = "POST"
+  request_headers = {
+    Authorization = "Basic ${base64encode(format("%s:",var.sonar_admin_token))}"
+  }
+  lifecycle {
+    postcondition {
+      condition     = contains([204], self.status_code)
+      error_message = "Status code invalid"
+    }
+  }
+  depends_on = [sonarqube_project.project]
 }
 # We do need to set the AIM setting
 # We also need to rename the branch name
@@ -43,30 +66,30 @@ resource "github_team" "teams" {
 # Add this https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team_members
 # Figure out how to do it as a for_each, looks nested
 #https://medium.com/@larry_nguyen/how-to-repeat-resources-block-in-terraform-using-loops-and-variables-36b13726d638
+resource "github_team_membership" "some_team_membership" {
+  for_each = {for team-membership in local.member_team_binding : "${team-membership.team_id}-${team-membership.username}" => team-membership}
+  team_id  = github_team.teams[each.value.team_id].id
+  username = each.value.username
+  role     = "member"
+  depends_on = [resource.github_team.teams]
+}
 resource "github_team_repository" "team-bind" {
   for_each   = {for team in local.repo_team_binding : "${team.repo}-${team.team_id}" => team}
   team_id    = each.value.team_id
   repository = each.value.repo
   permission = each.value.team_permission
-  depends_on = [resource.github_team.teams]
+  depends_on = [resource.github_team.teams,module.repo]
 }
-resource "github_branch" "development" {
-  repository    = module.repo["devops-test2"].repo_instance
-  branch        = "development"
-  source_branch = "main"
-  depends_on    = [module.repo]
-}
-
 
 resource "github_actions_organization_secret" "SONAR_TOKEN" {
   secret_name     = "SONAR_TOKEN"
   visibility      = "private"
-  encrypted_value = base64encode(var.sonar_token)
+  plaintext_value = var.sonar_token # TODO fix
 }
 
 
 resource "github_actions_organization_secret" "SONAR_URL" {
   secret_name     = "SONAR_URL"
   visibility      = "private"
-  encrypted_value = base64encode(var.sonar_url)
+  plaintext_value = var.sonar_url
 }
