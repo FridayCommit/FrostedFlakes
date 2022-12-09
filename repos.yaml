@@ -4,10 +4,13 @@
     - topic1
     - topic2
   teams:
-    - team1
-    - team2
+    - name: team1
+      permission: pull
+    - name: team2
+      permission: maintain
   extra-members:
-    - johan
+    - name: felixlut
+      permission: triage
 - name: Repo2
   visibility: public
   topics: []

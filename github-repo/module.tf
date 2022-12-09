@@ -35,3 +35,11 @@ resource "github_repository_file" "default-sonarqube-config" {
   commit_author  = "Terraform User"
   commit_email   = "terraform@example.com"
 }
+
+resource "github_repository_collaborator" "extra_members" {
+  for_each = { for member in var.extra_members : "${github_repository.repository.name}-${member.name}" => member }
+  repository = github_repository.repository.name
+  username =  each.value.name
+  permission = each.value.permission
+}
+  

@@ -1,0 +1,10 @@
+- name: team1
+  description: "Some fancy team"
+  privacy: secret
+  members:
+    - felixlut
+- name: team2
+  description: "Some fancy team2"
+  privacy: secret
+  members:
+    - ViktorLindgren95
