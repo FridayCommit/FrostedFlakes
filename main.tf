@@ -42,7 +42,7 @@ resource "sonarqube_project" "project" {
 # I dunno yet if the data source also works as depends on or if i have to be explicit here
 data "http" "set_branch" {
   for_each = module.repo
-  url    = "${var.sonar_url}/api/project_branches/rename?name=${data.github_repository.repo_data[each.value.repo_instance.full_name].default_branch}&project=${each.value.repo_instance.name}" //TODO felix fatta hur vi passar branch
+  url    = "${var.sonar_url}/api/project_branches/rename?name=${data.github_repository.repo_data[each.value.repo_instance.name].default_branch}&project=${each.value.repo_instance.name}" //TODO felix fatta hur vi passar branch
   method = "POST"
   request_headers = {
     Authorization = "Basic ${base64encode(format("%s:",var.sonar_admin_token))}"
