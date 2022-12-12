@@ -28,15 +28,36 @@ module "repo" {
   extra_members      = each.value.extra-members
   archive_on_destroy = true
 }
+data "github_repository" "repo_data" {
+  for_each   = module.repo
+  full_name = each.value.repo_instance.full_name
+}
 resource "sonarqube_project" "project" {
   for_each   = module.repo
   name       = each.value.repo_instance.name
   project    = each.value.repo_instance.name
   visibility = "public"
 }
+# TODO we could reference maybe something like ${each.value.repo_instance.default_branch}. i know its decrecated but we arent using it to set, but to retrieve? Or data source?
+# I dunno yet if the data source also works as depends on or if i have to be explicit here
 data "http" "set_branch" {
   for_each = module.repo
-  url    = "${var.sonar_url}/api/project_branches/rename?name=main&project=${each.value.repo_instance.name}" //TODO felix fatta hur vi passar branch
+  url    = "${var.sonar_url}/api/project_branches/rename?name=${data.github_repository.repo_data[each.value.repo_instance.full_name].default_branch}&project=${each.value.repo_instance.name}" //TODO felix fatta hur vi passar branch
+  method = "POST"
+  request_headers = {
+    Authorization = "Basic ${base64encode(format("%s:",var.sonar_admin_token))}"
+  }
+  lifecycle {
+    postcondition {
+      condition     = contains([204], self.status_code)
+      error_message = "Status code invalid"
+    }
+  }
+  depends_on = [sonarqube_project.project]
+}
+data "http" "set_alm" {
+  for_each = module.repo
+  url    = "${var.sonar_url}/api/alm_settings/set_github_binding?almSetting=GitHub&monorepo=no&project=${each.value.repo_instance.name}&repository=${each.value.repo_instance.full_name}" //TODO felix fatta hur vi passar branch
   method = "POST"
   request_headers = {
     Authorization = "Basic ${base64encode(format("%s:",var.sonar_admin_token))}"
@@ -73,7 +94,7 @@ resource "github_team_membership" "some_team_membership" {
   role     = "member"
   depends_on = [resource.github_team.teams]
 }
-resource "github_team_repository" "team-bind" {
+resource "github_team_repository" "team-bind" { # TODO Should this be moved to the github module? Its part of the repository in a way right ? Just make sure teams are created before repos when strap
   for_each   = {for team in local.repo_team_binding : "${team.repo}-${team.team_id}" => team}
   team_id    = each.value.team_id
   repository = each.value.repo
