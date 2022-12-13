@@ -12,8 +12,9 @@ variable "sonar_token" {
 variable "gh_token" {
   description = "GitHub token"
   type        = string
+  sensitive   = true
 }
-# TF_VAR_gh_token
+# TF_VAR_gh_org
 variable "gh_org" {
   description = "GitHub Organization"
   type        = string
@@ -22,4 +23,5 @@ variable "gh_org" {
 variable "sonar_admin_token" {
   description = "SonarQube Admin Token"
   type        = string
+  sensitive   = true
 }
