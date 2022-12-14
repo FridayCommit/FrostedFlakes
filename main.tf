@@ -67,6 +67,8 @@ module "sonarqube" {
   repo_name      = each.value.name
   full_repo_name = each.value.full_name
   default_branch = each.value.default_branch
+  sonar_admin_token = var.sonar_admin_token
+  sonar_url = var.sonar_url
 }
 
 resource "github_actions_organization_secret" "SONAR_TOKEN" {
