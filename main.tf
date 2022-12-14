@@ -62,11 +62,11 @@ resource "github_team_repository" "team_bind" {
 
 module "sonarqube" {
   # for_each       = { for repo in module.repo : repo => repo if repo.sonarqube_enabled }
-  for_each       = module.repo 
+  for_each       = data.github_repository.repo_data
   source         = "./sonarqube"
   repo_name      = each.value.name
   full_repo_name = each.value.full_name
-  default_branch = data.github_repository.repo_data[each.value.repo_instance.name].default_branch
+  default_branch = each.value.default_branch
 }
 
 resource "github_actions_organization_secret" "SONAR_TOKEN" {
