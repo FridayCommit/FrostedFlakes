@@ -1,0 +1,52 @@
+name: Create Repo
+on:
+  pull_request:
+    types: [opened, reopened]
+    paths:
+      - 'repo/**.json'
+# It looks like we need to have a static input name for the input. because we cannot get the name of the files easily
+# What we can do is called it like, repo-template.json or something. then we keep that name static, do our changes like validate and add owner to teams.
+# Then we check if the file exists already, If it dosent we change name of the file and move to the next work.
+#${{ steps.format.outputs.repo_name }}
+# format needs to extract the users into an array :)
+# https://curl.se/docs/manpage.html
+jobs:
+  echo-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: format json
+        id: format
+        env:
+          file_name: repo.json
+        run: |
+          repo=$(cat $file_name | jq -r '.owner')
+          cat $file_name | jq '.teams += [{name: .owner,permission: "write"}]' > $repo.json
+          rm $file_name
+          echo "repo_name=$repo" >> $GITHUB_OUTPUT
+      - name: validate
+        id: validate
+        env:
+          file_name: ${{ steps.format.outputs.repo_name }}
+          org: SnowSoftwareGlobal
+        run: |
+          array=$(cat $file_name.json | jq -r '.extra_members[].name')
+          for user in ${array[@]}; do
+             curl \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"\
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              --fail \
+              https://api.github.com/orgs/$org/members/$user
+          done
+      # We should add a notification step here for it this validation fails
+      - name: Push changes
+        id: push # Dont know if this works but lets try it :)
+        run: |
+          git add .
+          git commit -m "Automated"
+          git push
+
