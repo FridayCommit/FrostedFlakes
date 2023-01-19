@@ -1,10 +1,12 @@
-- name: team1
+- name: terraform-team1
   description: "Some fancy team"
   privacy: secret
   members:
-    - felixlut
-- name: team2
+    - ViktorLindgren95
+- name: terraform-team2
   description: "Some fancy team2"
   privacy: secret
   members:
     - ViktorLindgren95
+
+

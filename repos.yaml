@@ -1,18 +1,18 @@
-- name: Repo1
-  visibility: public
+- name: devops-test1
+  visibility: internal
   topics:
-    - topic1
-    - topic2
+    - todo1
+    - todo2
   teams:
-    - name: team1
+    - name: terraform-team1
       permission: pull
-    - name: team2
+    - name: terraform-team2
       permission: maintain
   extra-members:
-    - name: felixlut
+    - name: todo
       permission: triage
-- name: Repo2
-  visibility: public
+- name: devops-test2
+  visibility: internal
   topics: []
   teams: []
   extra-members: []

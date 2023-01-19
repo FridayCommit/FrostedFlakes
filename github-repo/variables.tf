@@ -24,3 +24,7 @@ variable "extra_members" {
   }))
   default = []
 }
+variable "topics" {
+  type = list
+  default = []
+}
